@@ -1,0 +1,81 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 28.12.2023 00:44:16
+
+newmtl 08___Default
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5882 0.5882 0.5882
+	Kd 0.5882 0.5882 0.5882
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka textures\trees\Concrete042A_2K-PNG_Color.png
+	map_Kd textures\trees\Concrete042A_2K-PNG_Color.png
+	map_Ks textures\trees\Concrete042A_2K-PNG_Roughness.png
+	map_bump textures\trees\Concrete042A_2K-PNG_NormalGL.png
+	bump textures\trees\Concrete042A_2K-PNG_NormalGL.png
+	map_refl textures\trees\Concrete042A_2K-PNG_Metalness.png
+
+newmtl mat_plane
+	Ns 41.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5882 0.5882 0.5882
+	Kd 0.5882 0.5882 0.5882
+	Ks 0.6570 0.6570 0.6570
+	Ke 0.0000 0.0000 0.0000
+	map_Ka textures\trees\patchy-meadow1_albedo.png
+	map_Kd textures\trees\patchy-meadow1_albedo.png
+	map_bump textures\trees\patchy-meadow1_normal-dx.png
+	bump textures\trees\patchy-meadow1_normal-dx.png
+
+newmtl mat_pine_tree_trunk
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5882 0.5882 0.5882
+	Kd 0.5882 0.5882 0.5882
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka textures\trees\pine-tree-bark_albedo.png
+	map_Kd textures\trees\pine-tree-bark_albedo.png
+	map_bump textures\trees\pine-tree-bark_normal-ogl.png
+	bump textures\trees\pine-tree-bark_normal-ogl.png
+
+newmtl mat_pine_tree_leaf_twoside_nocollision
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5882 0.5882 0.5882
+	Kd 0.5882 0.5882 0.5882
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka textures\trees\pngwing.com.png
+	map_Kd textures\trees\pngwing.com.png
+	map_d textures\trees\pngwing.com-alpha.png
+
+newmtl mat_grass_twoside_nocollision
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5880 0.5880 0.5880
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka textures\trees\plant03.png
+	map_Kd textures\trees\plant03.png

@@ -3,4 +3,3 @@
 
 ![preview](media/demo-1.png)
 
-![preview](media/demo-2.png)

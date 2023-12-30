@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="project-igi" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="Engine/OpenGL/;Engine/;The Game/;imgui/" />
+		<Build>
+			<Target title="Debug">
+				<Option output="./bin/project-igi" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="./bin/" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-std=c++20" />
+					<Add option="-DUNICODE" />
+					<Add option="-D_UNICODE" />
+					<Add option="-DDEBUG" />
+					<Add option="-D_DEBUG" />
+					<Add directory="E:/programming-stuff/game-development/resident-evil/include" />
+					<Add directory="E:/programming-stuff/msys64/ucrt64/include/bullet" />
+					<Add directory="../imgui-v1.90" />
+					<Add directory="../imgui-v1.90/backends" />
+				</Compiler>
+				<Linker>
+					<Add library="opengl32" />
+					<Add library="glfw3" />
+					<Add library="BulletCollision" />
+					<Add library="BulletDynamics" />
+					<Add library="LinearMath" />
+					<Add library="libassimp" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="./bin/project-igi" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="./bin/" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++20" />
+					<Add directory="include" />
+					<Add directory="E:/programming-stuff/game-development/resident-evil/include" />
+					<Add directory="E:/programming-stuff/msys64/ucrt64/include/bullet" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="opengl32" />
+					<Add library="glfw3" />
+					<Add library="BulletCollision" />
+					<Add library="BulletDynamics" />
+					<Add library="LinearMath" />
+					<Add library="libassimp" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="../imgui-v1.90/backends/imgui_impl_glfw.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/backends/imgui_impl_glfw.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/backends/imgui_impl_opengl3.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/backends/imgui_impl_opengl3.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/backends/imgui_impl_opengl3_loader.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imconfig.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui_demo.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui_draw.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui_internal.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui_tables.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui_widgets.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imstb_rectpack.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imstb_textedit.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imstb_truetype.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="animation.cpp">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="camera.cpp">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="camera.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="character.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="coremath.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="demon.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="engine.cpp">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="engine.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="game.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="game.h">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="gamehud.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="gameinput.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="gamemap.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="gameplay.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="gamerender.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="glad.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="Engine/OpenGL/" />
+		</Unit>
+		<Unit filename="glbuffer.cpp">
+			<Option virtualFolder="Engine/OpenGL/" />
+		</Unit>
+		<Unit filename="glframebuffer.cpp">
+			<Option virtualFolder="Engine/OpenGL/" />
+		</Unit>
+		<Unit filename="glshader.cpp">
+			<Option virtualFolder="Engine/OpenGL/" />
+		</Unit>
+		<Unit filename="glsystem.cpp">
+			<Option virtualFolder="Engine/OpenGL/" />
+		</Unit>
+		<Unit filename="glsystem.h">
+			<Option virtualFolder="Engine/OpenGL/" />
+		</Unit>
+		<Unit filename="gltexture.cpp">
+			<Option virtualFolder="Engine/OpenGL/" />
+		</Unit>
+		<Unit filename="light.cpp">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="light.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="main.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="matrix4.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="mesh.cpp">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="mesh.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="meshloader.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="openglstuffs.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="player.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="projectile.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="renderer.cpp">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="renderer.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="resourcemgr.cpp">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="stdafx.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="textparser.cpp">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="textparser.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="texture.cpp">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="util.cpp">
+			<Option virtualFolder="The Game/" />
+		</Unit>
+		<Unit filename="world.cpp">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Unit filename="world.h">
+			<Option virtualFolder="Engine/" />
+		</Unit>
+		<Extensions>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

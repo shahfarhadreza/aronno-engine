@@ -1,0 +1,600 @@
+#include "stdafx.h"
+#include "engine.h"
+#include "renderer.h"
+#include "world.h"
+#include "camera.h"
+#include "mesh.h"
+#include "light.h"
+
+#include "glsystem.h"
+
+#include "doom.h"
+
+IGPUShaderProgram* LoadShaders(const char* vertex_file_path, const char* fragment_file_path, const char* geom_file_path = 0);
+
+float projectileSize = 5;
+
+Vertex projectileVertices[] = {
+    // positions        // texture Coords
+    Vertex(-projectileSize,    projectileSize, 0.0f, 0.0f, 1.0f),
+    Vertex(-projectileSize,  -projectileSize, 0.0f, 0.0f, 0.0f),
+    Vertex(projectileSize,    projectileSize, 0.0f, 1.0f, 1.0f),
+    Vertex(projectileSize,  -projectileSize, 0.0f, 1.0f, 0.0f),
+};
+
+BulletProjectile::BulletProjectile(const glm::vec3& origin, const glm::vec3& dir)
+    : mOrigin(origin), mDirection(dir) {
+
+    mPosition = mOrigin;
+    mSpeed = 600.0f;
+    mMaxDistance = 300;
+
+    for(auto& v : projectileVertices) {
+        mLocalBoundingBox.extend(v.position);
+    }
+}
+
+void PopupText::update(float dt) {
+    if (mTime >= mDuration) {
+        markForRemove();
+    } else {
+        mTime += dt * 100.0f;
+    }
+}
+
+MuzzleFx::MuzzleFx(Player* player, float duration)
+    : mPlayer(player), mMuzzleLight(nullptr), mDuration(duration), mTime(0), mOpacity(1) {
+    mWorldTransform = glm::mat4(1);
+
+    mMuzzleLight = Engine::get()->getWorld()->createPointLight({0, 10, 0}, true);
+    mMuzzleLight->setColor({0.8, 0.6, 0.2});
+}
+
+MuzzleFx::~MuzzleFx() {
+    if (mMuzzleLight) {
+        Engine::get()->getWorld()->removeLight(mMuzzleLight);
+        mMuzzleLight = nullptr;
+    }
+}
+
+void MuzzleFx::update(float dt) {
+    if (mTime >= mDuration) {
+        markForRemove();
+    } else {
+        mTime += dt * 100.0f;
+    }
+
+    if (mTime > (mDuration/2)) {
+        mOpacity -= dt * 5;
+        if (mOpacity < 0.0) {
+            mOpacity = 0;
+        }
+    }
+
+    glm::mat4 matMuzzle;
+    matMuzzle = glm::mat4(1.0f);
+    matMuzzle = glm::translate(matMuzzle, glm::vec3(-1, 10, -17) );
+    matMuzzle = glm::scale(matMuzzle, glm::vec3( 9, 5, 0) );
+    //matMuzzle = glm::rotate(matMuzzle, M_DEGTORAD * 30, glm::vec3( 0, 1, 0));
+
+    mWorldTransform = mPlayer->matPistol * matMuzzle;
+
+    if (mMuzzleLight) {
+        glm::vec4 pos = {0, 0, 0, 1};
+        pos = mWorldTransform * pos;
+        mMuzzleLight->setPosition({pos.x, pos.y, pos.z});
+    }
+}
+
+Game::Game(GLFWwindow* window)
+    : mWindow(window), mEngine(nullptr), mRend(nullptr), mResourceMgr(nullptr),
+    mCurrentState(nullptr), mCamera(glm::vec3(0.0f, 0.0f, 0.0f)) {
+
+    mMissionComplete = false;
+}
+
+Game::~Game() {
+    for(DemonBase* d : mEnemyCharacterList) {
+        delete d;
+    }
+    delete mPlayerCharacter;
+
+    delete levelRigidBody;
+    delete levelMotionState;
+    delete levelColShape;
+
+    //delete dynamics world
+    delete dynamicsWorld;
+    //delete solver
+    delete solver;
+    //delete broadphase
+    delete overlappingPairCache;
+    //delete dispatcher
+    delete dispatcher;
+    delete collisionConfiguration;
+
+    if (mEngine)
+        delete mEngine;
+}
+
+bool Game::loadResources() {
+    std::cout << "Loading scene..." << std::endl;
+
+    Mesh* levelMesh = mResourceMgr->loadMesh("plane.obj", "area_02", true);
+    SkeletonMesh* playerMesh = mResourceMgr->loadSkeletonMesh("fps_animations_fn_502_tactical/scene.gltf", "pistol");
+    //mDemonMesh = mResourceMgr->loadMesh("crate.obj", "demon");
+
+    std::cout << "Loading shaders..." << std::endl;
+    depthProgram = LoadShaders("shaders/glsl/depth.vert", "shaders/glsl/depth.frag");
+    shadowDepthProgram = LoadShaders("shaders/glsl/shadow_depth.vert", "shaders/glsl/shadow_depth.frag");
+    shadowCubeDepthProgram = LoadShaders("shaders/glsl/depth_cube.vert", "shaders/glsl/depth_cube.frag", "shaders/glsl/depth_cube.geom");
+    lightProgram = LoadShaders("shaders/glsl/normal_map.vert", "shaders/glsl/normal_map.frag");
+    blurProgram = LoadShaders("shaders/glsl/blurpass.vert", "shaders/glsl/blurpass.frag");
+    ssaoProgram = LoadShaders("shaders/glsl/ssao.vert", "shaders/glsl/ssao.frag");
+    quadProgram = LoadShaders("shaders/glsl/quad.vert", "shaders/glsl/quad.frag");
+    hudProgram = LoadShaders("shaders/glsl/hud.vert", "shaders/glsl/hud.frag");
+    projectileProgram = LoadShaders("shaders/glsl/projectile.vert", "shaders/glsl/projectile.frag");
+    fxProgram = LoadShaders("shaders/glsl/fx.vert", "shaders/glsl/fx.frag");
+/*
+    mCrosshairTexture = mResourceMgr->loadTexture("textures/cross.png")->getGPUResource();
+    mHudHealthTexture = mResourceMgr->loadTexture("textures/hud_health.png")->getGPUResource();
+    mHudBulletTexture = mResourceMgr->loadTexture("textures/hud_bullet.png")->getGPUResource();
+    mHudFontTexture = mResourceMgr->loadTexture("textures/font.tga")->getGPUResource();
+    mProjectileTexture = mResourceMgr->loadTexture("textures/blue_glow.png")->getGPUResource();
+    mMuzzleTexture = mResourceMgr->loadTexture("textures/muzzleflash_fire.png")->getGPUResource();
+
+    std::cout << "Importing Animated Model..." << std::endl;
+    mAnimatedMesh = mResourceMgr->loadSkeletonMesh("Pilot_LP_Animated.fbx", "Blake");
+
+    if (mAnimatedMesh) {
+        std::cout << "SUCCESS: Imported animated model using AssimpLib" << std::endl;
+
+        auto tex = mResourceMgr->loadTexture("textures/Material.002_Base_Color.png");
+        mAnimatedMesh->getSubMeshList()[0]->getMaterial()->setDiffuseMap(tex);
+    }
+*/
+    // Setup entities
+    mLevelEntity = mWorld->createEntity();
+    mWorld->addMeshComponent(mLevelEntity , levelMesh);
+    //mPlayerEntity = mWorld->createEntity("Player", playerMesh);
+
+    mPlayerEntity = mWorld->createEntity();
+    mWorld->addMeshComponent(mPlayerEntity, playerMesh);
+    mWorld->addTransformComponent(mPlayerEntity, {10, 5, 0}, {0, 0, 0}, {50, 50, 50});
+
+    return true;
+}
+
+bool Game::init() {
+    if (!mWindow) {
+        std::cout << "ERROR: Window must be created before initializing Aronno Engine." << std::endl;
+        std::cout << "ERROR: Failed to initialize Aronno Engine." << std::endl;
+        return false;
+    }
+    std::cout << "Initializing engine..." << std::endl;
+    mEngine = new Engine(mWindow);
+
+    if (!mEngine->init(RS_OPENGL)) {
+        std::cout << "ERROR: Failed to initialize Aronno Engine with OpenGL" << std::endl;
+        return false;
+    }
+
+    mRend = mEngine->getRenderingSystem();
+    mResourceMgr = mEngine->getResourceManager();
+    mWorld = mEngine->getWorld();
+
+    mSunLight = mWorld->createSunLight(true);
+
+    mSunLight->setPosition(glm::vec3(-140.0f, 200.0f, 100.0f));
+
+    std::cout << "Initializing Bullet Physics Engine..." << std::endl;
+    initPhysicsEngine();
+
+    if (!loadResources()) {
+        std::cout << "ERROR: Failed to load resources" << std::endl;
+        return false;
+    }
+
+    initDynamicObjects();
+
+    // load the map
+    loadMap("plane.map");
+
+/*
+    std::cout << "Creating the Sky..." << std::endl;
+    std::vector<std::string> faces = {
+        "./textures/sky/right.jpg",
+        "./textures/sky/left.jpg",
+        "./textures/sky/top.jpg",
+        "./textures/sky/bottom.jpg",
+        "./textures/sky/front.jpg",
+        "./textures/sky/back.jpg"
+    };
+    unsigned int cubemapTexture = loadCubemap(faces);
+*/
+    // buffers for screen quad
+    mScreenQuad = mRend->createQuadBufferIndexed();
+    mHUDQuad = mRend->createQuadBufferIndexed();
+    mMuzzleQuad = mRend->createQuadBufferIndexed();
+
+    {
+        uint32_t vCount = sizeof(projectileVertices) / sizeof(Vertex);
+        mProjectileVB = mRend->createGPUVertexBuffer(projectileVertices, vCount);
+
+        uint32_t iCount = sizeof(quadIndices) / sizeof(uint32_t);
+        mProjectileIB = mRend->createGPUIndexBuffer(quadIndices, iCount);
+    }
+
+    {
+        Vertex vertices[] = {
+            Vertex(-0.5, -0.5, -0.5, 1.0,1.0),
+            Vertex(0.5, -0.5, -0.5, 1.0,1.0),
+            Vertex(0.5,  0.5, -0.5, 1.0,1.0),
+            Vertex(-0.5,  0.5, -0.5, 1.0,1.0),
+            Vertex(-0.5, -0.5,  0.5, 1.0,1.0),
+            Vertex(0.5, -0.5,  0.5, 1.0,1.0),
+            Vertex(0.5,  0.5,  0.5, 1.0,1.0),
+            Vertex(-0.5,  0.5,  0.5, 1.0,1.0),
+        };
+
+        uint32_t elements[] = {
+            0, 1, 2, 3,
+            4, 5, 6, 7,
+            0, 4, 1, 5, 2, 6, 3, 7
+        };
+
+        uint32_t vCount = sizeof(vertices) / sizeof(Vertex);
+        mBoundingBoxVB = mRend->createGPUVertexBuffer(vertices, vCount);
+
+        uint32_t iCount = sizeof(elements) / sizeof(uint32_t);
+        mBoundingBoxIB = mRend->createGPUIndexBuffer(elements, iCount);
+    }
+
+    {
+        Vertex vertices[] = {
+            Vertex(-0.5, 0, -0.5, 1.0,1.0),
+            Vertex(0.5, 0, -0.5, 1.0,1.0),
+            Vertex(0.2,  1, -0.2, 1.0,1.0),
+            Vertex(-0.2,  1, -0.2, 1.0,1.0),
+            Vertex(-0.5, 0,  0.5, 1.0,1.0),
+            Vertex(0.5, 0,  0.5, 1.0,1.0),
+            Vertex(0.2,  1,  0.2, 1.0,1.0),
+            Vertex(-0.2,  1,  0.2, 1.0,1.0),
+        };
+
+        uint32_t elements[] = {
+            0, 1, 2, 3,
+            4, 5, 6, 7,
+            0, 4, 1, 5, 2, 6, 3, 7
+        };
+
+        uint32_t vCount = sizeof(vertices) / sizeof(Vertex);
+        mBoneVB = mRend->createGPUVertexBuffer(vertices, vCount);
+
+        uint32_t iCount = sizeof(elements) / sizeof(uint32_t);
+        mBoneIB = mRend->createGPUIndexBuffer(elements, iCount);
+    }
+
+    {
+        // max 20 vertices will be enough!
+        mHUDTextHealthVB = mRend->createGPUVertexBuffer(nullptr, 64);
+        mHUDTextAmmoVB = mRend->createGPUVertexBuffer(nullptr, 64);
+        mHUDMsgTextVB = mRend->createGPUVertexBuffer(nullptr, 256);
+    }
+
+
+    mCBPerFrame = mRend->createGPUConstantBuffer(sizeof(cbPerFrame));
+    mCBPerObject = mRend->createGPUConstantBuffer(sizeof(cbPerObject));
+    mCBPerAnimatedObject = mRend->createGPUConstantBuffer(sizeof(cbPerAnimatedObject));
+    mCBLightArray = mRend->createGPUConstantBuffer(sizeof(cbLightArray));
+    mCBPostProcess = mRend->createGPUConstantBuffer(sizeof(cbPostProcess));
+
+    mCBShadowCube = mRend->createGPUConstantBuffer(sizeof(cbShadowCube));
+
+    const uint32_t numSamples = 32;
+
+    struct {
+	    glm::vec4 samples[numSamples];
+	} SSAOData;
+
+    mCBSSAO = mRend->createGPUConstantBuffer(sizeof(SSAOData));
+
+	std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between [0.0, 1.0]
+    std::default_random_engine generator;
+    for (unsigned int i = 0; i < numSamples; ++i)
+    {
+        glm::vec4 sample(
+            randomFloats(generator) * 2.0 - 1.0,
+            randomFloats(generator) * 2.0 - 1.0,
+            randomFloats(generator),
+            0.0f
+        );
+        sample  = glm::normalize(sample);
+        sample *= randomFloats(generator);
+
+        float scale = (float)i / float(numSamples);
+        scale   = lerp(0.1f, 1.0f, scale * scale);
+        sample *= scale;
+        SSAOData.samples[i] = sample;
+    }
+
+    mCBSSAO->updateData(&SSAOData);
+
+    const int noiseW = 4;
+    const int noiseH = 4;
+    const int noiseSize = noiseW * noiseH;
+
+    std::vector<glm::vec3> ssaoNoise;
+    for (int i = 0; i < noiseSize; i++)
+    {
+        glm::vec3 noise(
+            randomFloats(generator) * 2.0 - 1.0,
+            randomFloats(generator) * 2.0 - 1.0,
+            0.0f);
+        ssaoNoise.push_back(noise);
+    }
+
+    mNoiseTexture = mRend->createGPUTexture(noiseW, noiseH, &ssaoNoise[0], TextureFormat::RGBA32_FLOAT);
+
+
+    std::cout << "Initializing frame buffer objects..." << std::endl;
+    initFrameBuffers();
+
+    mCamera.updateProjection(float(SCR_WIDTH), float(SCR_HEIGHT));
+
+    std::cout << "Starting..." << std::endl;
+    mCurrentState = new GamePlayState();
+    mCurrentState->start(nullptr);
+
+    return true;
+}
+
+void Game::initFrameBuffers() {
+
+    // Depth Buffer
+    FrameBufferDesc smDesc;
+    smDesc.Width = SCR_WIDTH;
+    smDesc.Height = SCR_HEIGHT;
+    smDesc.Flags = FRAME_BUFFER_FLAG_SHADOW;
+    smDesc.FilterType = TextureFilterType::PointFilter;
+    smDesc.NumRenderTarget = 0;
+
+    depthFBO = mRend->createFrameBufferObject(smDesc);
+
+    // Shadow Map/Depth Buffer
+    smDesc.Width = 4096;
+    smDesc.Height = 4096;
+    smDesc.Flags = FRAME_BUFFER_FLAG_SHADOW;
+    smDesc.FilterType = TextureFilterType::PointFilter;
+    smDesc.NumRenderTarget = 0;
+
+    shadowMapFBO = mRend->createFrameBufferObject(smDesc);
+
+    // Primary Buffer
+    FrameBufferDesc pDesc;
+    pDesc.Width = SCR_WIDTH;
+    pDesc.Height = SCR_HEIGHT;
+    pDesc.Flags = FRAME_BUFFER_FLAG_COLOR | FRAME_BUFFER_FLAG_DEPTH_STENCIL;
+    pDesc.FilterType = TextureFilterType::LinearFilter;
+    pDesc.NumRenderTarget = 2;
+
+    pDesc.RenderTargetDescList = {
+        RenderTargetDesc {
+            .FilterType = TextureFilterType::LinearFilter,
+            .Format = TextureFormat::RGBA32_FLOAT
+        },
+        RenderTargetDesc {
+            .FilterType = TextureFilterType::LinearFilter,
+            .Format = TextureFormat::RGBA32_FLOAT
+        },
+    };
+    primaryFBO = mRend->createFrameBufferObject(pDesc);
+
+    // Blur Pass Buffer
+	FrameBufferDesc blurDesc;
+	blurDesc.Width = SCR_WIDTH;
+	blurDesc.Height = SCR_HEIGHT;
+	blurDesc.Flags = FRAME_BUFFER_FLAG_COLOR;
+	blurDesc.FilterType = TextureFilterType::LinearFilter;
+	blurDesc.NumRenderTarget = 1;
+
+	blurDesc.RenderTargetDescList = {
+	    RenderTargetDesc {
+	        .FilterType = TextureFilterType::LinearFilter,
+	        .Format = TextureFormat::RGBA32_FLOAT
+	    }
+	};
+
+	blurPassFBO1 = mRend->createFrameBufferObject(blurDesc);
+	blurPassFBO2 = mRend->createFrameBufferObject(blurDesc);
+
+	blurDesc.Width = SCR_WIDTH;
+	blurDesc.Height = SCR_HEIGHT;
+
+	blurDesc.RenderTargetDescList = {
+	    RenderTargetDesc {
+	        .FilterType = TextureFilterType::LinearFilter,
+	        .Format = TextureFormat::R32_FLOAT
+	    }
+	};
+
+	ssaoFBO = mRend->createFrameBufferObject(blurDesc);
+}
+
+void Game::initPhysicsEngine() {
+
+    collisionConfiguration = new btDefaultCollisionConfiguration();
+    dispatcher = new btCollisionDispatcher(collisionConfiguration);
+    overlappingPairCache = new btDbvtBroadphase();
+    solver = new btSequentialImpulseConstraintSolver;
+    dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+
+    dynamicsWorld->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+    dynamicsWorld->setGravity(btVector3(0.0f, -9.8f, 0.0f));
+}
+
+void Game::initDynamicObjects() {
+    // create a mesh shape for the level
+    btVector3 localInertia(0, 0, 0);
+
+    levelMeshBullet = mWorld->getMeshComponent(mLevelEntity).mMesh->getCollisionMesh();
+
+    levelColShape = new btBvhTriangleMeshShape(levelMeshBullet, true);
+
+    btTransform groundTransform;
+    groundTransform.setIdentity();
+    groundTransform.setOrigin(btVector3(0, 0, 0));
+
+    btScalar levelMass(0);
+
+    levelColShape->calculateLocalInertia(levelMass, localInertia);
+
+    //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+    levelMotionState = new btDefaultMotionState(groundTransform);
+    btRigidBody::btRigidBodyConstructionInfo rbInfo1(levelMass, levelMotionState, levelColShape, localInertia);
+    levelRigidBody = new btRigidBody(rbInfo1);
+
+    dynamicsWorld->addRigidBody(levelRigidBody);
+
+    // create player
+    mPlayerCharacter = new Player(dynamicsWorld, glm::vec3(-20.0f, 80.0f, 135.5f), &mCamera);
+
+    //demon = new DemonBase(mDemonMesh, dynamicsWorld, glm::vec3(50.0f, 120.0f, 0.5f));
+    //mEnemyCharacterList.push_back(demon);
+
+    //demon = new DemonBase(mDemonMesh, dynamicsWorld, glm::vec3(100.0f, 120.0f, 40.5f));
+    //mEnemyCharacterList.push_back(demon);
+}
+
+float cameraTime = 0;
+
+void Game::update(float dt) {
+    if (mCurrentState) {
+        mCurrentState->update(dt);
+    }
+/*
+    mCamera.update(dt);
+    mSunLight->update(dt);
+*/
+    // update bullet physic
+    dynamicsWorld->stepSimulation(dt * 10, 4, 1.f / 60.f);
+
+    btTransform trans = mPlayerCharacter->getGhostObject()->getWorldTransform();
+
+    btVector3 vel = mPlayerCharacter->getController()->getLinearVelocity();
+    btVector3 velXZ(vel.getX(), 0.0f, vel.getZ());
+
+    float velocity = velXZ.length() * 5;
+
+    float offset_factor = sin(cameraTime);
+
+    glm::vec3 playerPos(float(trans.getOrigin().getX()), float(trans.getOrigin().getY()) + 30 + offset_factor, float(trans.getOrigin().getZ()));
+
+    mCamera.setPosition(playerPos);
+
+    // do bobbing math
+    cameraTime += dt * 15 * velocity;
+
+    if (cameraTime >= 6.2) {
+        cameraTime = 0;
+    }
+
+    mCamera.update(dt);
+    mSunLight->update(dt);
+
+    const auto& meshCompList = mWorld->mMeshComponents;
+
+    for(auto itEnt = meshCompList.begin(); itEnt != meshCompList.end();++itEnt) {
+        const MeshComponent& comp = itEnt->second;
+        Mesh* mesh = comp.mMesh;
+
+        SkeletonMesh* skeMesh = mesh->isSkeletonMesh();
+        if (skeMesh) {
+            Skeleton* skeleton = skeMesh->getSkeleton();
+            skeleton->update(dt);
+        }
+    }
+
+    if (mPlayerCharacter) {
+        mPlayerCharacter->update(dt);
+    }
+
+    // Update demons too!
+    for(auto it = mEnemyCharacterList.begin(); it != mEnemyCharacterList.end();) {
+        DemonBase* ch = *it;
+        if (ch->isMarkedForRemove()) {
+            ch->triggerRemove();
+            it = mEnemyCharacterList.erase(it);
+            delete ch;
+        } else {
+            ch->update(dt);
+            it++;
+        }
+    }
+
+    // Update bullet projectiles
+    for(auto it = mBulletProjectiles.begin(); it != mBulletProjectiles.end();) {
+
+        BulletProjectile& bullet = *it;
+        float distance = glm::distance(bullet.mOrigin, bullet.mPosition);
+
+        if (distance > bullet.mMaxDistance || bullet.isMarkedForRemove()) {
+            bullet.triggerRemove();
+            it = mBulletProjectiles.erase(it);
+        }
+        else {
+            bullet.update(dt);
+
+            // If this bullet collides with any demon, do hit damage
+            for(DemonBase* ch : mEnemyCharacterList) {
+
+                AABB meshBBox = ch->mMesh->getBoundingBox();
+
+                // Mesh local bbox to World space bbox
+                meshBBox.transform(ch->mTransform);
+
+                INTERSECTION_TYPE result = bullet.mWorldBoundingBox.intersect(meshBBox);
+
+                if (result != INTERSECTION_TYPE::OUTSIDE) {
+                    //printf("BULLET HIT!!!\n");
+                    bullet.markForRemove();
+                    ch->triggerDamage();
+                }
+            }
+            ++it;
+        }
+    }
+
+    // Check for mission complete
+    if (mEnemyCharacterList.size() == 0 && mMissionComplete == false) {
+        mPopupTextList.push_back(PopupText("Mission Complete", {(float(SCR_WIDTH) / 2) - 260, (float(SCR_HEIGHT) / 2) - 60}, 30, 300));
+        mMissionComplete = true;
+    }
+
+    // Check for popups
+    for(auto it = mPopupTextList.begin(); it != mPopupTextList.end();) {
+        if ((*it).isMarkedForRemove()) {
+            (*it).triggerRemove();
+            it = mPopupTextList.erase(it);
+        } else {
+            (*it).update(dt);
+            it++;
+        }
+    }
+
+    // Check for muzzles
+    for(auto it = mMuzzleFxList.begin(); it != mMuzzleFxList.end();) {
+        MuzzleFx* fx = *it;
+        if (fx->isMarkedForRemove()) {
+            fx->triggerRemove();
+            it = mMuzzleFxList.erase(it);
+            delete fx;
+        } else {
+            fx->update(dt);
+            it++;
+        }
+    }
+}
+
+
+

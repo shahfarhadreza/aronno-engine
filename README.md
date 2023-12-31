@@ -8,14 +8,16 @@ it is easily possible to add other rendering API such as Vulkan or DirectX since
 ## Currently Supported Features
 
 1. Skeleton Animation
-2. Cascaded Shadow Map (For large Open-World game)
-3. Screen-Space Ambient Occlusion
-4. Bloom
-5. Tone Mapping
-6. HDR Rendering
-7. SkyBox
-8. Physically Based Rendering (PBR) Shader (in progress...)
-
+2. Keyframe Animation
+3. Cascaded Shadow Map (For large Open-World game)
+4. Screen-Space Ambient Occlusion
+5. Bloom
+6. Tone Mapping
+7. HDR Rendering
+8. SkyBox
+9. Physically Based Rendering (PBR) Shader (in progress...)
+10. Normal Mapping
+11. Decals Rendering
 
 ![preview](media/demo-1.png)
 

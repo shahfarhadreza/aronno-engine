@@ -11,6 +11,7 @@
 #include "textparser.h"
 
 bool Game::loadMap(const std::string& filename) {
+    printf("loading map...\n");
     std::ifstream file(filename);
 
     if (!file.is_open()) {

@@ -83,7 +83,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_SAMPLES, 4);
 
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "PROJECT IGI", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "ARONNO", nullptr, nullptr);
 	if (window == nullptr) {
 		std::cout << "ERROR::WINDOW::CREATION" << std::endl;
 		glfwTerminate();
@@ -147,7 +147,7 @@ int main() {
         nbFrames++;
         if ( currentTime - lastTime >= 1.0 ){ // If last prinf() was more than 1 sec ago
             // printf and reset timer
-            sprintf(buf, "DOOM - %d FPS, %f ms/frame, %d Draw Calls",
+            sprintf(buf, "ARONNO - %d FPS, %f ms/frame, %d Draw Calls",
                     nbFrames, 1000.0/double(nbFrames), nDrawCalls);
             glfwSetWindowTitle(window, buf);
             nbFrames = 0;

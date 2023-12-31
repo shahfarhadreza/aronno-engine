@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="project-igi" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="imgui/" />
+		<Build>
+			<Target title="Debug">
+				<Option output="../bin/project-igi" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-std=c++20" />
+					<Add option="-DUNICODE" />
+					<Add option="-D_UNICODE" />
+					<Add option="-DDEBUG" />
+					<Add option="-D_DEBUG" />
+					<Add directory="../include" />
+					<Add directory="E:/programming-stuff/msys64/ucrt64/include/bullet" />
+					<Add directory="../imgui-v1.90" />
+					<Add directory="../imgui-v1.90/backends" />
+				</Compiler>
+				<Linker>
+					<Add library="opengl32" />
+					<Add library="glfw3" />
+					<Add library="BulletCollision" />
+					<Add library="BulletDynamics" />
+					<Add library="LinearMath" />
+					<Add library="libassimp" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="../bin/project-igi" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++20" />
+					<Add directory="../include" />
+					<Add directory="E:/programming-stuff/msys64/ucrt64/include/bullet" />
+					<Add directory="../imgui-v1.90" />
+					<Add directory="../imgui-v1.90/backends" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add library="opengl32" />
+					<Add library="glfw3" />
+					<Add library="BulletCollision" />
+					<Add library="BulletDynamics" />
+					<Add library="LinearMath" />
+					<Add library="libassimp" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="../imgui-v1.90/backends/imgui_impl_glfw.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/backends/imgui_impl_glfw.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/backends/imgui_impl_opengl3.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/backends/imgui_impl_opengl3.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/backends/imgui_impl_opengl3_loader.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imconfig.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui_demo.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui_draw.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui_internal.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui_tables.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imgui_widgets.cpp">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imstb_rectpack.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imstb_textedit.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../imgui-v1.90/imstb_truetype.h">
+			<Option virtualFolder="imgui/" />
+		</Unit>
+		<Unit filename="../include/camera.h" />
+		<Unit filename="../include/coremath.h" />
+		<Unit filename="../include/engine.h" />
+		<Unit filename="../include/game.h" />
+		<Unit filename="../include/glsystem.h" />
+		<Unit filename="../include/light.h" />
+		<Unit filename="../include/matrix4.h" />
+		<Unit filename="../include/mesh.h" />
+		<Unit filename="../include/meshloader.h" />
+		<Unit filename="../include/openglstuffs.h" />
+		<Unit filename="../include/renderer.h" />
+		<Unit filename="../include/stdafx.h" />
+		<Unit filename="../include/textparser.h" />
+		<Unit filename="../include/world.h" />
+		<Unit filename="../src/animation.cpp" />
+		<Unit filename="../src/camera.cpp" />
+		<Unit filename="../src/character.cpp" />
+		<Unit filename="../src/demon.cpp" />
+		<Unit filename="../src/engine.cpp" />
+		<Unit filename="../src/game.cpp" />
+		<Unit filename="../src/gamehud.cpp" />
+		<Unit filename="../src/gameinput.cpp" />
+		<Unit filename="../src/gamemap.cpp" />
+		<Unit filename="../src/gameplay.cpp" />
+		<Unit filename="../src/gamerender.cpp" />
+		<Unit filename="../src/glad.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/glbuffer.cpp" />
+		<Unit filename="../src/glframebuffer.cpp" />
+		<Unit filename="../src/glshader.cpp" />
+		<Unit filename="../src/glsystem.cpp" />
+		<Unit filename="../src/gltexture.cpp" />
+		<Unit filename="../src/light.cpp" />
+		<Unit filename="../src/main.cpp" />
+		<Unit filename="../src/mesh.cpp" />
+		<Unit filename="../src/player.cpp" />
+		<Unit filename="../src/projectile.cpp" />
+		<Unit filename="../src/renderer.cpp" />
+		<Unit filename="../src/resourcemgr.cpp" />
+		<Unit filename="../src/textparser.cpp" />
+		<Unit filename="../src/texture.cpp" />
+		<Unit filename="../src/util.cpp" />
+		<Unit filename="../src/world.cpp" />
+		<Extensions>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

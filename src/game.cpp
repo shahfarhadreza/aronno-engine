@@ -62,17 +62,18 @@ bool Game::loadResources() {
     //sunProgram = mResourceMgr->loadShaders("shaders/glsl/sun.vert", "shaders/glsl/sun.frag", "shaders/glsl/sun.geom");
 
     std::cout << "Loading level..." << std::endl;
-
+/*
     mDoorMesh = mResourceMgr->loadMesh("door_white.obj", "door", true);
     mDumpsterMesh = mResourceMgr->loadMesh("dumpster.obj", "dumpster", true);
     mDumpsterLidMesh = mResourceMgr->loadMesh("dumpster_lid.obj", "dumpster_lid", true);
-
+*/
     mLevelMesh = mResourceMgr->loadMesh("plane.obj", "area_02", true);
     mPlayerMesh = mResourceMgr->loadSkeletonMesh("fps_animations_fn_502_tactical/scene.gltf", "fps_hand");
     //mDemonMesh = mResourceMgr->loadMesh("crate.obj", "demon");
-
+/*
     mDoorInteractTex = mResourceMgr->loadTexture("textures/interact_door.png", true);
     mDumpsterInteractTex = mResourceMgr->loadTexture("textures/interact_dumpster.png", true);
+*/
     mCrosshairTexture = mResourceMgr->loadTexture("textures/cross.png", true)->getGPUResource();
     mHudHealthTexture = mResourceMgr->loadTexture("textures/health_igi.png", true)->getGPUResource();
     mHudBulletTexture = mResourceMgr->loadTexture("textures/hud_bullet_igi.png", true)->getGPUResource();
@@ -89,17 +90,6 @@ bool Game::loadResources() {
                                     "./textures/sky/front.jpg",
                                     "./textures/sky/back.jpg"
                                    }, true);
-/*
-    std::cout << "Importing Animated Model..." << std::endl;
-    mAnimatedMesh = mResourceMgr->loadSkeletonMesh("Pilot_LP_Animated.fbx", "Blake");
-
-    if (mAnimatedMesh) {
-        std::cout << "SUCCESS: Imported animated model using AssimpLib" << std::endl;
-
-        auto tex = mResourceMgr->loadTexture("textures/Material.002_Base_Color.png");
-        mAnimatedMesh->getSubMeshList()[0]->getMaterial()->setDiffuseMap(tex);
-    }
-*/
     return true;
 }
 

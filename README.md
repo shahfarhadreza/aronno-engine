@@ -19,6 +19,10 @@ it is easily possible to add other rendering API such as Vulkan or DirectX since
 10. Normal Mapping
 11. Decals Rendering
 
+## Preview
+
+![preview](media/demo-1.png)
+
 ## Dependencies
 
 1. OpenGL 4.6
@@ -27,8 +31,4 @@ it is easily possible to add other rendering API such as Vulkan or DirectX since
 4. Bullet Physics
 5. Assimp
 6. Dear ImGui
-
-## Preview
-
-![preview](media/demo-1.png)
 

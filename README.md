@@ -19,5 +19,16 @@ it is easily possible to add other rendering API such as Vulkan or DirectX since
 10. Normal Mapping
 11. Decals Rendering
 
+## Dependencies
+
+1. OpenGL 4.6
+2. GLFW
+3. Glad
+4. Bullet Physics
+5. Assimp
+6. Dear ImGui
+
+## Preview
+
 ![preview](media/demo-1.png)
 
